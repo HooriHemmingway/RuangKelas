@@ -1,7 +1,0 @@
-streamlit
-pandas
-altair
-python-dotenv
-supabase
-Pillow
-openpyxl
