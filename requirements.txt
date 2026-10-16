@@ -1,5 +1,7 @@
-﻿streamlit
-supabase
-python-dotenv
+streamlit
 pandas
-plotly
+altair
+python-dotenv
+supabase
+Pillow
+openpyxl
