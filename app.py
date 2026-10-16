@@ -93,7 +93,7 @@ bg_css = f"""
     }}
 """ if img_base64 else ".stApp { background-color: #07090E; color: #E2E8F0; }"
 
-# Kustomisasi CSS Modern dengan Tema Luar Angkasa & Aksen Hijau #01595A + Biru Futuristik
+# Kustomisasi CSS Modern dengan Tema Luar Angkasa & Aksen Hijau #01595A + Biru Futuristik + Teks Masukan Neon #b6ff3b
 st.markdown(f"""
     <style>
     {bg_css}
@@ -122,15 +122,16 @@ st.markdown(f"""
     }}
     .sub-header {{
         font-size: 1.05rem;
-        color: #94A3B8;
+        color: #b6ff3b;
         margin-bottom: 25px;
+        font-weight: 500;
     }}
     .footer-credit {{
         font-size: 0.82rem;
-        color: #64748B;
+        color: #b6ff3b;
         text-align: center;
         margin-top: 15px;
-        font-weight: 500;
+        font-weight: 600;
         letter-spacing: 0.5px;
     }}
     .quote-card-guru {{
@@ -167,7 +168,7 @@ st.markdown(f"""
     }}
     .translation-text {{
         font-size: 0.95rem;
-        color: #CBD5E1;
+        color: #b6ff3b;
         font-style: italic;
         line-height: 1.5rem;
     }}
@@ -232,7 +233,24 @@ st.markdown(f"""
         text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
     }}
     [data-testid="stMetricLabel"] {{
-        color: #94A3B8 !important;
+        color: #b6ff3b !important;
+        font-weight: 600;
+    }}
+    
+    /* PEWARNAAN JUDUL PILIHAN / ISIAN (INPUT LABELS) DENGAN WARNA NEON #b6ff3b */
+    label, 
+    [data-testid="stWidgetLabel"] p, 
+    [data-testid="stWidgetLabel"] span,
+    .stSelectbox label p, 
+    .stTextInput label p, 
+    .stTextArea label p, 
+    .stNumberInput label p, 
+    .stDateInput label p, 
+    .stFileUploader label p {{
+        color: #b6ff3b !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        letter-spacing: 0.3px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -287,9 +305,9 @@ def render_graduation_countdown():
     if days_left > 0:
         st.markdown(f"""
         <div class="countdown-card">
-            <div style="font-size: 0.9rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">🎓 Hitung Mundur Kelulusan</div>
+            <div style="font-size: 0.9rem; color: #b6ff3b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">🎓 Hitung Mundur Kelulusan</div>
             <div class="countdown-text">🎓 {days_left} days until graduating</div>
-            <div style="font-size: 0.85rem; color: #CBD5E1;">Target Kelulusan: <b>{grad_date.strftime('%d %B %Y')}</b></div>
+            <div style="font-size: 0.88rem; color: #b6ff3b; font-weight: 500;">Target Kelulusan: <b>{grad_date.strftime('%d %B %Y')}</b></div>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -426,8 +444,8 @@ def dashboard_guru():
                     <div class="announcement-card">
                         <span style="background-color:#01595A; color:#00F2FE; padding:2px 10px; border-radius:6px; font-size:12px; font-weight:bold; border:1px solid #00F2FE;">{a['category']}</span>
                         <h4 style="margin:10px 0 4px 0; color:#F8FAFC;">{a['title']}</h4>
-                        <p style="color:#CBD5E1; font-size:14px; margin-bottom:8px;">{a['content']}</p>
-                        <small style="color:#64748B;">Oleh: {a['author_name']} | Tanggal: {a['created_at'][:10]}</small>{file_info}
+                        <p style="color:#b6ff3b; font-size:14px; margin-bottom:8px;">{a['content']}</p>
+                        <small style="color:#b6ff3b;">Oleh: {a['author_name']} | Tanggal: {a['created_at'][:10]}</small>{file_info}
                     </div>
                     """, unsafe_allow_html=True)
             else:
@@ -918,8 +936,8 @@ def dashboard_siswa():
                     <div class="announcement-card">
                         <span style="background-color:{badge_color}; color:{text_color}; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:bold; border:1px solid {text_color};">{a['category']}</span>
                         <h3 style="margin:10px 0 6px 0; color:#F8FAFC;">{a['title']}</h3>
-                        <p style="color:#CBD5E1; font-size:15px; line-height:1.5rem; margin-bottom:12px;">{a['content']}</p>
-                        <small style="color:#64748B;">Oleh: <b>{a['author_name']}</b> | Diterbitkan: {a['created_at'][:10]}</small>
+                        <p style="color:#b6ff3b; font-size:15px; line-height:1.5rem; margin-bottom:12px;">{a['content']}</p>
+                        <small style="color:#b6ff3b;">Oleh: <b>{a['author_name']}</b> | Diterbitkan: {a['created_at'][:10]}</small>
                     </div>
                     """, unsafe_allow_html=True)
                     
@@ -1132,3 +1150,5 @@ else:
         dashboard_guru()
     else:
         dashboard_siswa()
+
+
