@@ -413,7 +413,7 @@ def dashboard_guru():
     st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00fff0;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
     
     st.sidebar.title("🧭 Navigasi Guru")
-    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Pengumuman & Tugas", "Absensi Kelas", "Pelanggaran Siswa", "Manajemen Akun Siswa", "Nilai"])
+    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Pengumuman & Tugas", "Absensi Kelas", "Pelanggaran Siswa", "Manajemen Akun Siswa", "Nilai", "ASSIK"])
     
     if menu == "Beranda":
         render_quote_guru()
@@ -903,14 +903,14 @@ def dashboard_guru():
                                     
                                     payload = {
                                         "student_username": uname,
-                                        "subject": sel_subject,
+                                        "subject": sel_subject.strip(),
                                         "chapter": sel_chapter,
                                         "material_name": sel_material.strip(),
                                         "kkm": sel_kkm,
                                         "score": val_score
                                     }
                                     
-                                    chk = supabase.table("grades").select("id").eq("student_username", uname).eq("subject", sel_subject).eq("chapter", sel_chapter).eq("material_name", sel_material.strip()).execute().data
+                                    chk = supabase.table("grades").select("id").eq("student_username", uname).eq("subject", sel_subject.strip()).eq("chapter", sel_chapter).eq("material_name", sel_material.strip()).execute().data
                                     if chk:
                                         supabase.table("grades").update(payload).eq("id", chk[0]["id"]).execute()
                                     else:
@@ -960,7 +960,6 @@ def dashboard_guru():
                             
                             target_username = name_map.get(clean_key) or username_map.get(clean_key)
                             
-                            # KONVERSI NILAI YANG MENDUKUNG ANGKA 0 & NILAI KOSONG/NAN
                             score_val = None
                             if pd.notna(raw_score):
                                 try:
@@ -972,7 +971,7 @@ def dashboard_guru():
                                 status_str = f"🟢 Cocok (Nilai: {score_val})"
                                 matched_payloads.append({
                                     "student_username": target_username,
-                                    "subject": ex_subject,
+                                    "subject": ex_subject.strip(),
                                     "chapter": ex_chapter,
                                     "material_name": ex_material.strip(),
                                     "kkm": ex_kkm,
@@ -1025,17 +1024,21 @@ def dashboard_guru():
             rekap_subject = st.selectbox("Pilih Mata Pelajaran untuk Rekap", subjects_list, key="rekap_subj_select")
             
             try:
-                all_grades = supabase.table("grades").select("*").eq("subject", rekap_subject).execute().data
+                # Query flekibel pencocokan mata pelajaran
+                all_grades = supabase.table("grades").select("*").execute().data
                 students = supabase.table("users").select("username, full_name").eq("role", "siswa").order("full_name").execute().data
                 
-                if all_grades and students:
+                # Filter manual agar fleksibel terhadap spasi berlebih
+                subject_grades = [g for g in all_grades if str(g.get("subject")).strip().lower() == rekap_subject.strip().lower()]
+                
+                if subject_grades and students:
                     matrix_data = []
                     for s in students:
                         uname = s["username"]
                         row_dict = {"Nama Siswa": s["full_name"], "NISN / Username": uname}
                         
                         for ch in range(1, 9):
-                            ch_scores = [g["score"] for g in all_grades if g["student_username"] == uname and g["chapter"] == ch]
+                            ch_scores = [g["score"] for g in subject_grades if g["student_username"] == uname and int(g["chapter"]) == ch]
                             if ch_scores:
                                 row_dict[f"Bab {ch}"] = round(sum(ch_scores) / len(ch_scores), 1)
                             else:
@@ -1050,19 +1053,102 @@ def dashboard_guru():
             except Exception as e:
                 st.error(f"Gagal memuat rekap nilai: {e}")
 
+    elif menu == "ASSIK":
+        st.subheader("⚡ Program ASSIK (Asesmen & Evaluasi Akademik Berkala)")
+        st.info("Menu khusus guru untuk mengelola dan memasukkan nilai evaluasi/asesmen berkala siswa.")
+        
+        assik_tabs = st.tabs(["✍️ Input Nilai ASSIK", "📊 Rekap Asesmen ASSIK"])
+        
+        with assik_tabs[0]:
+            try:
+                students = supabase.table("users").select("username, full_name").eq("role", "siswa").order("full_name").execute().data
+            except:
+                students = []
+                
+            if not students:
+                st.warning("Belum ada akun siswa terdaftar.")
+            else:
+                col_a1, col_a2 = st.columns(2)
+                with col_a1:
+                    assik_type = st.selectbox("Jenis Asesmen ASSIK", ["Formatif Harian", "Sumatif Bab", "Proyek ASSIK", "Pasca-Tes Program"], key="assik_type_sel")
+                    assik_subject = st.selectbox("Mata Pelajaran ASSIK", subjects_list, key="assik_subj_sel")
+                with col_a2:
+                    assik_kkm = st.number_input("KKM Asesmen", min_value=0, max_value=100, value=75, key="assik_kkm_input")
+                    assik_title = st.text_input("Judul Asesmen / Evaluasi ASSIK", placeholder="Misal: Evaluasi Literasi ASSIK Pekan 1", key="assik_title_input")
+                    
+                st.markdown("---")
+                st.write("**Daftar Nilai Siswa (Program ASSIK)**")
+                
+                with st.form("form_input_assik"):
+                    assik_scores = {}
+                    for s in students:
+                        c_n, c_s = st.columns([3, 2])
+                        c_n.markdown(f"**{s['full_name']}**<br><span style='font-size:12px; color:#00fff0;'>`{s['username']}`</span>", unsafe_allow_html=True)
+                        sc_val = c_s.number_input("Nilai", min_value=0.0, max_value=100.0, value=80.0, step=0.5, key=f"assik_sc_{s['username']}", label_visibility="collapsed")
+                        assik_scores[s["username"]] = sc_val
+                        st.markdown("<hr style='margin: 5px 0px; border-color: rgba(1, 89, 90, 0.4);'>", unsafe_allow_html=True)
+                        
+                    btn_submit_assik = st.form_submit_button("🚀 Simpan Evaluasi ASSIK", use_container_width=True)
+                    if btn_submit_assik:
+                        if assik_title.strip():
+                            try:
+                                for s in students:
+                                    uname = s["username"]
+                                    val_score = assik_scores[uname]
+                                    
+                                    # Menyimpan ke tabel grades dengan label khusus ASSIK pada material_name
+                                    full_material_name = f"[ASSIK - {assik_type}] {assik_title.strip()}"
+                                    
+                                    payload = {
+                                        "student_username": uname,
+                                        "subject": assik_subject.strip(),
+                                        "chapter": 1,
+                                        "material_name": full_material_name,
+                                        "kkm": assik_kkm,
+                                        "score": val_score
+                                    }
+                                    
+                                    chk = supabase.table("grades").select("id").eq("student_username", uname).eq("subject", assik_subject.strip()).eq("material_name", full_material_name).execute().data
+                                    if chk:
+                                        supabase.table("grades").update(payload).eq("id", chk[0]["id"]).execute()
+                                    else:
+                                        supabase.table("grades").insert(payload).execute()
+                                        
+                                st.success("🎉 Evaluasi ASSIK berhasil disimpan ke database!")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Gagal menyimpan nilai ASSIK: {e}")
+                        else:
+                            st.warning("Mohon isi Judul Asesmen / Evaluasi ASSIK terlebih dahulu.")
+                            
+        with assik_tabs[1]:
+            st.write("#### 📊 Rekapitulasi Program ASSIK")
+            try:
+                all_g = supabase.table("grades").select("*").execute().data
+                assik_grades = [g for g in all_g if "[ASSIK" in str(g.get("material_name"))]
+                
+                if assik_grades:
+                    df_assik_all = pd.DataFrame(assik_grades)
+                    display_assik = df_assik_all[["created_at", "student_username", "subject", "material_name", "kkm", "score"]].copy()
+                    display_assik.columns = ["Tanggal", "Username / NISN", "Mata Pelajaran", "Evaluasi ASSIK", "KKM", "Nilai"]
+                    st.dataframe(display_assik, use_container_width=True, hide_index=True)
+                else:
+                    st.info("Belum ada data evaluasi program ASSIK yang diinputkan.")
+            except Exception as e:
+                st.error(f"Gagal memuat rekap ASSIK: {e}")
+
 def dashboard_siswa():
     render_top_left_credit()
     st.markdown(f'<p class="main-header">Panel Siswa</p>', unsafe_allow_html=True)
     st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00fff0;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
     
     st.sidebar.title("🧭 Navigasi Siswa")
-    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Absensi Pribadi", "Nilai Saya", "Ganti Kata Sandi"])
+    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Absensi Pribadi", "Nilai Saya", "ASSIK", "Ganti Kata Sandi"])
     
     if menu == "Beranda":
         render_quote_siswa()
         render_graduation_countdown()
         
-        # Pengecekan Pelanggaran Khusus Akun Siswa yang Sedang Login (Otomatis hilang setelah 3 hari)
         try:
             my_uname = st.session_state.username
             all_my_violations = supabase.table("violations").select("*").eq("student_username", my_uname).order("created_at", desc=True).execute().data
@@ -1208,75 +1294,132 @@ def dashboard_siswa():
         
         try:
             my_username = st.session_state.username
-            grades_res = supabase.table("grades").select("*").eq("student_username", my_username).order("created_at", desc=True).execute().data
+            grades_res = supabase.table("grades").select("*").eq("student_username", my_username).order("created_at", desc=False).execute().data
             
             if grades_res:
                 df_grades = pd.DataFrame(grades_res)
-                df_grades["created_at_dt"] = pd.to_datetime(df_grades["created_at"])
                 
-                st.markdown("### ⚡ Nilai Terbaru (2 Minggu Terakhir)")
-                df_grades["is_recent"] = df_grades["created_at_dt"] >= (pd.Timestamp.now(tz=df_grades["created_at_dt"].dt.tz) - pd.Timedelta(days=14))
-                df_recent = df_grades[df_grades["is_recent"]].copy()
+                st.markdown("### 📜 Transkrip Seluruh Nilai Akademik Anda")
                 
-                if not df_recent.empty:
-                    recent_display = []
-                    for _, r in df_recent.iterrows():
-                        predikat = "🟢 Lulus" if r["score"] >= r["kkm"] else "🔴 Remedi"
-                        recent_display.append({
-                            "Tanggal": r["created_at"][:10],
-                            "Mata Pelajaran": r["subject"],
-                            "Bab": f"Bab {r['chapter']}",
-                            "Materi": r["material_name"],
-                            "KKM": r["kkm"],
-                            "Nilai Anda": r["score"],
-                            "Predikat": predikat
-                        })
-                    st.dataframe(pd.DataFrame(recent_display), use_container_width=True, hide_index=True)
-                else:
-                    st.info("Belum ada catatan nilai baru dalam 2 minggu terakhir.")
+                all_display = []
+                for _, r in df_grades.iterrows():
+                    score_num = float(r["score"])
+                    kkm_num = float(r["kkm"])
+                    predikat = "🟢 Lulus" if score_num >= kkm_num else "🔴 Mengulang"
                     
+                    date_str = r["created_at"][:10] if r.get("created_at") else "-"
+                    all_display.append({
+                        "Tanggal Input": date_str,
+                        "Mata Pelajaran": r["subject"],
+                        "Bab": f"Bab {r['chapter']}",
+                        "Materi / Evaluasi": r["material_name"],
+                        "KKM": kkm_num,
+                        "Nilai Anda": score_num,
+                        "Predikat Status": predikat
+                    })
+                    
+                df_all_view = pd.DataFrame(all_display)
+                st.dataframe(df_all_view, use_container_width=True, hide_index=True)
+                
                 st.markdown("---")
-                st.markdown("### 📊 Analisis & Diagram Progres Nilai Per Mata Pelajaran")
+                st.markdown("### 📈 Diagram Garis Tren Naik-Turun Nilai Per Mapel")
                 
                 subjects_list = df_grades["subject"].unique().tolist()
-                selected_mapel = st.selectbox("Pilih Mata Pelajaran untuk Dilihat Detail & Grafiknya", subjects_list)
+                selected_mapel = st.selectbox("Pilih Mata Pelajaran untuk Grafik Tren", subjects_list)
                 
-                df_mapel = df_grades[df_grades["subject"] == selected_mapel].sort_values(by="created_at")
+                df_mapel = df_grades[df_grades["subject"] == selected_mapel].copy()
                 
                 if not df_mapel.empty:
                     col_tabel, col_grafik = st.columns([1, 1.2])
                     
                     with col_tabel:
-                        st.markdown(f"**Tabel Rinci Nilai: {selected_mapel}**")
+                        st.markdown(f"**Detail Nilai: {selected_mapel}**")
                         table_view = df_mapel[["chapter", "material_name", "kkm", "score"]].copy()
-                        table_view["Predikat"] = table_view.apply(lambda x: "Lulus" if x["score"] >= x["kkm"] else "Remedi", axis=1)
-                        table_view.columns = ["Bab", "Materi", "KKM", "Nilai", "Predikat"]
+                        table_view["Predikat Status"] = table_view.apply(
+                            lambda x: "🟢 Lulus" if float(x["score"]) >= float(x["kkm"]) else "🔴 Mengulang", 
+                            axis=1
+                        )
+                        table_view.columns = ["Bab", "Materi", "KKM", "Nilai", "Predikat Status"]
                         st.dataframe(table_view, use_container_width=True, hide_index=True)
                         
                     with col_grafik:
-                        st.markdown(f"**Diagram Titik & Tren: {selected_mapel}**")
-                        chart = alt.Chart(df_mapel).mark_circle(size=80, color="#00fff0").encode(
+                        st.markdown(f"**Diagram Garis Pergerakan Nilai ({selected_mapel})**")
+                        
+                        line = alt.Chart(df_mapel).mark_line(color="#00fff0", point=True, strokeWidth=3).encode(
                             x=alt.X('material_name:N', sort=None, title='Materi Evaluasi'),
-                            y=alt.Y('score:Q', title='Nilai Siswa', scale=alt.Scale(domain=[0, 100])),
-                            tooltip=['subject', 'chapter', 'material_name', 'score', 'kkm']
-                        ) + alt.Chart(df_mapel).mark_line(color="#38BDF8", strokeWidth=2).encode(
+                            y=alt.Y('score:Q', title='Nilai', scale=alt.Scale(domain=[0, 100])),
+                            tooltip=['subject', 'material_name', 'score', 'kkm']
+                        )
+                        
+                        points = alt.Chart(df_mapel).mark_circle(size=70, color="#38BDF8").encode(
                             x=alt.X('material_name:N', sort=None),
                             y=alt.Y('score:Q')
                         )
                         
-                        kkm_line = alt.Chart(pd.DataFrame({'kkm': [df_mapel['kkm'].iloc[0]]})).mark_rule(color="#EF4444", strokeDash=[5, 5]).encode(
+                        kkm_line = alt.Chart(pd.DataFrame({'kkm': [df_mapel['kkm'].iloc[0]]})).mark_rule(color="#EF4444", strokeDash=[4, 4]).encode(
                             y='kkm:Q'
                         )
                         
-                        final_chart = (chart + kkm_line).properties(height=280).interactive()
-                        st.altair_chart(final_chart, use_container_width=True)
+                        chart_final = (line + points + kkm_line).properties(height=280).interactive()
+                        st.altair_chart(chart_final, use_container_width=True)
                         st.caption("🔴 Garis putus-putus merah menunjukkan batas KKM.")
                 else:
-                    st.info(f"Belum ada data nilai untuk mapel {selected_mapel}.")
+                    st.info(f"Belum ada data nilai untuk {selected_mapel}.")
             else:
                 st.info("Belum ada catatan nilai akademik yang diinputkan untuk akun Anda.")
         except Exception as e:
             st.error(f"Gagal memuat rekap nilai: {e}")
+
+    elif menu == "ASSIK":
+        st.subheader("⚡ Program ASSIK (Asesmen & Perkembangan Akademik Siswa)")
+        st.info("Menu khusus siswa untuk memantau hasil evaluasi dan garis perkembangan program ASSIK.")
+        
+        try:
+            my_username = st.session_state.username
+            all_g = supabase.table("grades").select("*").eq("student_username", my_username).order("created_at", desc=False).execute().data
+            assik_my = [g for g in all_g if "[ASSIK" in str(g.get("material_name"))]
+            
+            if assik_my:
+                df_assik_my = pd.DataFrame(assik_my)
+                
+                st.markdown("### 📜 Transkrip Evaluasi ASSIK Anda")
+                
+                display_assik_siswa = []
+                for _, r in df_assik_my.iterrows():
+                    sc = float(r["score"])
+                    kkm = float(r["kkm"])
+                    pred = "🟢 Lulus" if sc >= kkm else "🔴 Mengulang"
+                    display_assik_siswa.append({
+                        "Tanggal": r["created_at"][:10] if r.get("created_at") else "-",
+                        "Mata Pelajaran": r["subject"],
+                        "Nama Evaluasi ASSIK": r["material_name"],
+                        "KKM": kkm,
+                        "Nilai Anda": sc,
+                        "Predikat Status": pred
+                    })
+                    
+                st.dataframe(pd.DataFrame(display_assik_siswa), use_container_width=True, hide_index=True)
+                
+                st.markdown("---")
+                st.markdown("### 📈 Diagram Garis Naik-Turun Nilai ASSIK")
+                
+                line_assik = alt.Chart(df_assik_my).mark_line(color="#00fff0", point=True, strokeWidth=3).encode(
+                    x=alt.X('material_name:N', sort=None, title='Asesmen ASSIK'),
+                    y=alt.Y('score:Q', title='Nilai Asesmen', scale=alt.Scale(domain=[0, 100])),
+                    tooltip=['subject', 'material_name', 'score', 'kkm']
+                )
+                
+                points_assik = alt.Chart(df_assik_my).mark_circle(size=80, color="#FF007F").encode(
+                    x=alt.X('material_name:N', sort=None),
+                    y=alt.Y('score:Q')
+                )
+                
+                chart_assik_final = (line_assik + points_assik).properties(height=300).interactive()
+                st.altair_chart(chart_assik_final, use_container_width=True)
+            else:
+                st.info("Belum ada catatan evaluasi ASSIK untuk akun Anda saat ini.")
+        except Exception as e:
+            st.error(f"Gagal memuat data ASSIK: {e}")
 
     elif menu == "Ganti Kata Sandi":
         st.subheader("🔐 Ganti Kata Sandi Akun Anda")
