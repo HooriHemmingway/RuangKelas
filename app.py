@@ -926,7 +926,7 @@ def dashboard_guru():
                             st.warning("Mohon isi Nama Materi / Topik Evaluasi terlebih dahulu.")
                             
         with tab_input_excel:
-            st.info("Upload file Excel (.xlsx / .xls) atau CSV. File cukup berisi 2 kolom: **nama** (Nama lengkap siswa) dan **nilai**.")
+            st.info("Upload file Excel (.xlsx / .xls) atau CSV. Anda dapat menggunakan kolom **nama** ATAU **username** / **nisn** beserta kolom **nilai**.")
             
             with st.form("form_excel_nilai"):
                 ex_subject = st.selectbox("Mata Pelajaran", subjects_list, key="ex_subj")
@@ -944,53 +944,71 @@ def dashboard_guru():
                             df_ex = pd.read_csv(uploaded_grade_file) if uploaded_grade_file.name.endswith('.csv') else pd.read_excel(uploaded_grade_file)
                             df_ex.columns = [str(c).strip().lower() for c in df_ex.columns]
                             
-                            if {'nama', 'nilai'}.issubset(set(df_ex.columns)):
+                            # Cek fleksibilitas nama kolom
+                            has_nilai = 'nilai' in df_ex.columns or 'score' in df_ex.columns
+                            has_identifier = 'nama' in df_ex.columns or 'username' in df_ex.columns or 'nisn' in df_ex.columns
+                            
+                            if has_nilai and has_identifier:
+                                col_score_name = 'nilai' if 'nilai' in df_ex.columns else 'score'
+                                
                                 db_students = supabase.table("users").select("username, full_name").eq("role", "siswa").execute().data
-                                name_to_username = {s["full_name"].strip().lower(): s["username"] for s in db_students}
+                                
+                                # Peta pembanding tanpa spasi berlebih
+                                name_to_username = {str(s["full_name"]).strip().lower(): s["username"] for s in db_students}
+                                username_set = {str(s["username"]).strip().lower(): s["username"] for s in db_students}
                                 
                                 success_cnt = 0
                                 not_found_list = []
                                 
                                 for _, row in df_ex.iterrows():
                                     try:
-                                        student_name_raw = str(row["nama"]).strip()
-                                        student_name_key = student_name_raw.lower()
-                                        val_score = float(row["nilai"])
+                                        score_val = float(row[col_score_name])
+                                        target_uname = None
+                                        raw_identifier = ""
                                         
-                                        if student_name_key in name_to_username:
-                                            uname = name_to_username[student_name_key]
+                                        if 'username' in df_ex.columns and pd.notna(row['username']):
+                                            raw_identifier = str(row['username']).strip()
+                                            target_uname = username_set.get(raw_identifier.lower())
+                                        elif 'nisn' in df_ex.columns and pd.notna(row['nisn']):
+                                            raw_identifier = str(row['nisn']).strip()
+                                            target_uname = username_set.get(raw_identifier.lower())
+                                        elif 'nama' in df_ex.columns and pd.notna(row['nama']):
+                                            raw_identifier = str(row['nama']).strip()
+                                            target_uname = name_to_username.get(raw_identifier.lower())
                                             
+                                        if target_uname:
                                             payload = {
-                                                "student_username": uname,
+                                                "student_username": target_uname,
                                                 "subject": ex_subject,
                                                 "chapter": ex_chapter,
                                                 "material_name": ex_material.strip(),
                                                 "kkm": ex_kkm,
-                                                "score": val_score
+                                                "score": score_val
                                             }
                                             
-                                            chk = supabase.table("grades").select("id").eq("student_username", uname).eq("subject", ex_subject).eq("chapter", ex_chapter).eq("material_name", ex_material.strip()).execute().data
+                                            chk = supabase.table("grades").select("id").eq("student_username", target_uname).eq("subject", ex_subject).eq("chapter", ex_chapter).eq("material_name", ex_material.strip()).execute().data
                                             if chk:
                                                 supabase.table("grades").update(payload).eq("id", chk[0]["id"]).execute()
                                             else:
                                                 supabase.table("grades").insert(payload).execute()
                                             success_cnt += 1
                                         else:
-                                            not_found_list.append(student_name_raw)
-                                    except:
+                                            if raw_identifier:
+                                                not_found_list.append(raw_identifier)
+                                    except Exception as ex_row:
                                         pass
                                         
                                 if success_cnt > 0:
-                                    st.success(f"Berhasil mengimpor nilai untuk {success_cnt} siswa dari file Excel!")
+                                    st.success(f"🎉 Berhasil mengimpor nilai untuk {success_cnt} siswa!")
                                 if not_found_list:
-                                    st.warning(f"Siswa berikut tidak ditemukan di sistem: {', '.join(not_found_list)}")
+                                    st.warning(f"Siswa/Username berikut tidak ditemukan di database: {', '.join(not_found_list)}")
                                 st.rerun()
                             else:
-                                st.error("Kolom file Excel wajib memiliki: **nama** dan **nilai**.")
+                                st.error("Kolom file Excel wajib berisi minimal kolom **nama** (atau **username**) dan kolom **nilai**.")
                         except Exception as e:
                             st.error(f"Gagal membaca file Excel: {e}")
                     else:
-                        st.warning("Mohon isi Nama Materi dan pilih file Excel terlebih dahulu.")
+                        st.warning("Mohon isi Nama Materi dan unggah file Excel/CSV terlebih dahulu.")
 
         with tab_rekap_nilai:
             st.subheader("📈 Rekapitulasi Nilai Kelas Per Mata Pelajaran")
