@@ -1036,7 +1036,7 @@ def dashboard_siswa():
         render_quote_siswa()
         render_graduation_countdown()
         
-        # Pengecekan Pelanggaran Siswa (Otomatis hilang setelah 3 hari)
+        # Pengecekan Pelanggaran Khusus Akun Siswa yang Sedang Login (Otomatis hilang setelah 3 hari)
         try:
             my_uname = st.session_state.username
             all_my_violations = supabase.table("violations").select("*").eq("student_username", my_uname).order("created_at", desc=True).execute().data
@@ -1051,11 +1051,11 @@ def dashboard_siswa():
                         valid_violations.append(v)
                         
             if valid_violations:
-                st.markdown("### ⚠️ Catatan & Peringatan Pelanggaran")
+                st.markdown("### ⚠️ Catatan & Peringatan Pelanggaran Anda")
                 for v in valid_violations:
                     st.markdown(f"""
                     <div class="warning-card">
-                        <span style="background-color: #FDE047; color: #07090E; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">⚠️ PERINGATAN / WARNING (Otomatis hilang setelah 3 hari)</span>
+                        <span style="background-color: #FDE047; color: #07090E; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">⚠️ PERINGATAN PRIBADI (Otomatis hilang setelah 3 hari)</span>
                         <h4 style="margin: 8px 0 4px 0; color: #F8FAFC;">Pelanggaran: {v['violation']}</h4>
                         <p style="color: #E2E8F0; font-size: 14px; margin-bottom: 6px;"><b>Hukuman / Konsekuensi:</b> {v['punishment']}</p>
                         <small style="color: #cbd5e1;">Dicatat oleh Guru: {v['teacher_name']} | Tanggal: {v['created_at'][:10]}</small>
