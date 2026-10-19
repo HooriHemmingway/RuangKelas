@@ -12,9 +12,6 @@ import io
 # ==========================================
 # KONFIGURASI TANGGAL KELULUSAN FLEKSIBEL
 # ==========================================
-# Jika ingin mengubah tanggal kelulusan secara manual (misal dimajukan/dimundurkan),
-# isi formatnya "YYYY-MM-DD", contoh: "2027-06-10".
-# Jika diisi None, sistem otomatis menghitung ke 14 Juni tahun ajaran berjalan.
 GRADUATION_DATE_OVERRIDE = None 
 
 # Memuat konfigurasi dari file .env
@@ -40,7 +37,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Fungsi untuk membaca file gambar lokal ke Base64 (Latar Belakang Space/Nasa.jpg)
+# Fungsi untuk membaca file gambar lokal ke Base64
 def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
@@ -93,16 +90,16 @@ bg_css = f"""
     }}
 """ if img_base64 else ".stApp { background-color: #07090E; color: #E2E8F0; }"
 
-# Kustomisasi CSS Modern dengan Tema Luar Angkasa & Aksen Hijau #01595A + Biru Futuristik + Teks Masukan Neon #b6ff3b
+# Kustomisasi CSS Modern dengan Tema Luar Angkasa & Aksen Warna #00fff0
 st.markdown(f"""
     <style>
     {bg_css}
     
     .top-left-credit {{
         font-size: 0.82rem;
-        color: #00F2FE;
+        color: #00fff0;
         background: rgba(1, 89, 90, 0.35);
-        border: 1px solid rgba(0, 242, 254, 0.4);
+        border: 1px solid rgba(0, 255, 240, 0.4);
         padding: 4px 14px;
         border-radius: 20px;
         display: inline-block;
@@ -110,25 +107,25 @@ st.markdown(f"""
         font-weight: 600;
         letter-spacing: 0.5px;
         backdrop-filter: blur(6px);
-        box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+        box-shadow: 0 0 10px rgba(0, 255, 240, 0.15);
     }}
     .main-header {{
         font-size: 2.2rem;
-        color: #00F2FE;
+        color: #00fff0;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin-bottom: 0px;
-        text-shadow: 0 0 15px rgba(0, 242, 254, 0.35);
+        text-shadow: 0 0 15px rgba(0, 255, 240, 0.35);
     }}
     .sub-header {{
         font-size: 1.05rem;
-        color: #b6ff3b;
+        color: #ff0066;
         margin-bottom: 25px;
         font-weight: 500;
     }}
     .footer-credit {{
         font-size: 0.82rem;
-        color: #b6ff3b;
+        color: #e445ff;
         text-align: center;
         margin-top: 15px;
         font-weight: 600;
@@ -141,8 +138,8 @@ st.markdown(f"""
         border-radius: 16px;
         box-shadow: 0 10px 30px -5px rgba(1, 89, 90, 0.3);
         margin-bottom: 25px;
-        border: 1px solid rgba(0, 242, 254, 0.4);
-        border-left: 6px solid #00F2FE;
+        border: 1px solid rgba(0, 255, 240, 0.4);
+        border-left: 6px solid #00fff0;
         backdrop-filter: blur(8px);
     }}
     .quote-card-siswa {{
@@ -150,21 +147,21 @@ st.markdown(f"""
         color: #F8FAFC;
         padding: 24px;
         border-radius: 16px;
-        box-shadow: 0 10px 30px -5px rgba(0, 242, 254, 0.2);
+        box-shadow: 0 10px 30px -5px rgba(0, 255, 240, 0.2);
         margin-bottom: 25px;
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        border-left: 6px solid #38BDF8;
+        border: 1px solid rgba(0, 255, 240, 0.4);
+        border-left: 6px solid #00fff0;
         backdrop-filter: blur(8px);
     }}
     .arabic-text {{
         font-size: 1.5rem;
         font-family: 'Amiri', 'Traditional Arabic', 'Naskh', serif;
         line-height: 2.3rem;
-        color: #38BDF8;
+        color: #00fff0;
         direction: rtl;
         text-align: right;
         margin-bottom: 12px;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+        text-shadow: 0 0 10px rgba(0, 255, 240, 0.35);
     }}
     .translation-text {{
         font-size: 0.95rem;
@@ -185,7 +182,7 @@ st.markdown(f"""
         background-color: rgba(17, 24, 39, 0.80);
         padding: 20px;
         border-radius: 14px;
-        border-left: 5px solid #00F2FE;
+        border-left: 5px solid #00fff0;
         border-top: 1px solid rgba(30, 41, 59, 0.8);
         border-right: 1px solid rgba(30, 41, 59, 0.8);
         border-bottom: 1px solid rgba(30, 41, 59, 0.8);
@@ -193,22 +190,32 @@ st.markdown(f"""
         margin-bottom: 15px;
         backdrop-filter: blur(8px);
     }}
+    .warning-card {{
+        background: linear-gradient(135deg, rgba(120, 53, 15, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
+        border: 1px solid #FDE047;
+        border-left: 6px solid #FDE047;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 20px rgba(253, 224, 71, 0.2);
+        backdrop-filter: blur(8px);
+    }}
     .countdown-card {{
         background: linear-gradient(135deg, rgba(1, 89, 90, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-        border: 1px solid #00F2FE;
+        border: 1px solid #00fff0;
         border-radius: 16px;
         padding: 20px;
         text-align: center;
         margin-bottom: 25px;
-        box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+        box-shadow: 0 0 20px rgba(0, 255, 240, 0.25);
         backdrop-filter: blur(8px);
     }}
     .countdown-text {{
         font-size: 2rem;
         font-weight: 800;
-        color: #00F2FE;
+        color: #00fff0;
         letter-spacing: 1px;
-        text-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        text-shadow: 0 0 15px rgba(0, 255, 240, 0.5);
         margin: 5px 0;
     }}
     .graduation-congrats-card {{
@@ -228,16 +235,18 @@ st.markdown(f"""
         line-height: 1.8rem;
     }}
     [data-testid="stMetricValue"] {{
-        color: #00F2FE !important;
+        color: #00fff0 !important;
         font-weight: 700;
-        text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        text-shadow: 0 0 10px rgba(0, 255, 240, 0.3);
     }}
     [data-testid="stMetricLabel"] {{
         color: #b6ff3b !important;
         font-weight: 600;
     }}
     
-    /* PEWARNAAN JUDUL PILIHAN / ISIAN (INPUT LABELS) DENGAN WARNA NEON #b6ff3b */
+    /* PEWARNAAN MENU NAVIGASI SIDEBAR, USERNAME/NISN, PASSWORD, DAN LABEL INPUT MENJADI #00fff0 */
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label p,
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label span,
     label, 
     [data-testid="stWidgetLabel"] p, 
     [data-testid="stWidgetLabel"] span,
@@ -247,7 +256,7 @@ st.markdown(f"""
     .stNumberInput label p, 
     .stDateInput label p, 
     .stFileUploader label p {{
-        color: #b6ff3b !important;
+        color: #00fff0 !important;
         font-weight: 700 !important;
         font-size: 1rem !important;
         letter-spacing: 0.3px !important;
@@ -271,11 +280,9 @@ if 'logged_in' not in st.session_state:
     st.session_state.user_name = ""
     st.session_state.username = ""
 
-# --- FUNGSI TAMPILAN KREDIT ATAS KIRI ---
 def render_top_left_credit():
     st.markdown('<div class="top-left-credit">⚡ Built by M. Ainul Hurri Jailani</div>', unsafe_allow_html=True)
 
-# --- FUNGSI AUTO-CLEANUP PENGUMUMAN > 14 HARI ---
 def cleanup_expired_announcements():
     try:
         cutoff_date = (datetime.now() - timedelta(days=14)).isoformat()
@@ -283,17 +290,14 @@ def cleanup_expired_announcements():
     except Exception:
         pass
 
-cleanup_expired_announcements()
+if supabase:
+    cleanup_expired_announcements()
 
-# --- FUNGSI HITUNG MUNDUR KELULUSAN ---
 def render_graduation_countdown():
     today = date.today()
-    
-    # Menentukan tanggal kelulusan
     if GRADUATION_DATE_OVERRIDE:
         grad_date = datetime.strptime(GRADUATION_DATE_OVERRIDE, "%Y-%m-%d").date()
     else:
-        # Tahun ajaran dimulai 14 Juli dan berakhir 14 Juni tahun berikutnya
         if today >= date(today.year, 7, 14):
             grad_year = today.year + 1
         else:
@@ -324,7 +328,7 @@ def render_quote_guru():
     st.markdown("""
     <div class="quote-card-guru">
         <div style="margin-bottom: 10px;">
-            <span style="background: rgba(0, 242, 254, 0.2); color: #00F2FE; border: 1px solid #00F2FE; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">✨ Motivasi Pendidik</span>
+            <span style="background: rgba(0, 255, 240, 0.2); color: #00fff0; border: 1px solid #00fff0; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">✨ Motivasi Pendidik</span>
         </div>
         <div style="font-size: 1.15rem; font-weight: 500; line-height: 1.7rem; font-style: italic; margin-bottom: 10px; color: #F8FAFC;">
             "Guru yang biasa-biasa saja menceritakan. Guru yang baik menjelaskan. Guru yang unggul menunjukkan. Guru hebat menginspirasi."
@@ -339,7 +343,7 @@ def render_quote_siswa():
     st.markdown("""
     <div class="quote-card-siswa">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="background: #01595A; color: #00F2FE; border: 1px solid #00F2FE; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">📜 Mutiara Hikmah — Diwan Imam Asy-Syafi'i</span>
+            <span style="background: #01595A; color: #00fff0; border: 1px solid #00fff0; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">📜 Mutiara Hikmah — Diwan Imam Asy-Syafi'i</span>
         </div>
         <div class="arabic-text">
             تَعَلَّمْ فَلَيْسَ الْمَرْءُ يُولَدُ عَالِمًا ... وَلَيْسَ أَخُو عِلْمٍ كَمَنْ هُوَ جَاهِلُ<br>
@@ -359,11 +363,10 @@ def auth_page():
     col1, col2, col3 = st.columns([1, 1.6, 1])
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        
         if logo_clean_b64:
             st.markdown(f'''
             <div style="text-align: center; margin-bottom: 10px;">
-                <img src="data:image/png;base64,{logo_clean_b64}" width="110" style="filter: drop-shadow(0 0 10px rgba(0,242,254,0.3));">
+                <img src="data:image/png;base64,{logo_clean_b64}" width="110" style="filter: drop-shadow(0 0 10px rgba(0,255,240,0.3));">
             </div>
             ''', unsafe_allow_html=True)
             
@@ -408,10 +411,10 @@ def auth_page():
 def dashboard_guru():
     render_top_left_credit()
     st.markdown(f'<p class="main-header">Panel Guru / Admin</p>', unsafe_allow_html=True)
-    st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00F2FE;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00fff0;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
     
     st.sidebar.title("🧭 Navigasi Guru")
-    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Pengumuman & Tugas", "Absensi Kelas", "Manajemen Akun Siswa", "Nilai"])
+    menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Pengumuman & Tugas", "Absensi Kelas", "Pelanggaran Siswa", "Manajemen Akun Siswa", "Nilai"])
     
     if menu == "Beranda":
         render_quote_guru()
@@ -439,17 +442,17 @@ def dashboard_guru():
             anc = supabase.table("announcements").select("id, author_name, category, title, content, file_name, created_at").order("created_at", desc=True).limit(5).execute().data
             if anc:
                 for a in anc:
-                    file_info = f"<br><small style='color:#00F2FE;'>📎 Lampiran: <b>{a['file_name']}</b></small>" if a.get('file_name') else ""
+                    file_info = f"<br><small style='color:#00fff0;'>📎 Lampiran: <b>{a['file_name']}</b></small>" if a.get('file_name') else ""
                     st.markdown(f"""
                     <div class="announcement-card">
-                        <span style="background-color:#01595A; color:#00F2FE; padding:2px 10px; border-radius:6px; font-size:12px; font-weight:bold; border:1px solid #00F2FE;">{a['category']}</span>
+                        <span style="background-color:#01595A; color:#00fff0; padding:2px 10px; border-radius:6px; font-size:12px; font-weight:bold; border:1px solid #00fff0;">{a['category']}</span>
                         <h4 style="margin:10px 0 4px 0; color:#F8FAFC;">{a['title']}</h4>
-                        <p style="color:#b6ff3b; font-size:14px; margin-bottom:8px;">{a['content']}</p>
-                        <small style="color:#b6ff3b;">Oleh: {a['author_name']} | Tanggal: {a['created_at'][:10]}</small>{file_info}
+                        <p style="color:#00fff0; font-size:14px; margin-bottom:8px;">{a['content']}</p>
+                        <small style="color:#00fff0;">Oleh: {a['author_name']} | Tanggal: {a['created_at'][:10]}</small>{file_info}
                     </div>
                     """, unsafe_allow_html=True)
             else:
-                st.info("Belum ada pengumuman. Buat pengumuman atau tugas baru di menu **Pengumuman & Tugas**.")
+                st.info("Belum ada pengumuman.")
         except Exception as e:
             st.error(f"Gagal memuat pengumuman: {e}")
 
@@ -515,6 +518,127 @@ def dashboard_guru():
                 st.info("Belum ada pengumuman yang diterbitkan.")
         except Exception as e:
             st.error(f"Gagal memuat pengumuman: {e}")
+
+    elif menu == "Pelanggaran Siswa":
+        st.subheader("⚠️ Catatan Pelanggaran & Hukuman Siswa (Rekap Bulanan)")
+        st.info("Catatan pelanggaran terekap setiap akhir bulan. Guru dapat mendownload rekapitulasi dalam format Excel, lalu menghapusnya jika diperlukan.")
+        
+        try:
+            students = supabase.table("users").select("username, full_name").eq("role", "siswa").order("full_name").execute().data
+        except:
+            students = []
+            
+        if not students:
+            st.warning("Belum ada akun siswa terdaftar.")
+        else:
+            student_options = {f"{s['full_name']} (`@{s['username']}`)": s["username"] for s in students}
+            
+            with st.form("form_catat_pelanggaran"):
+                selected_student_label = st.selectbox("Pilih Siswa", options=list(student_options.keys()))
+                pelanggaran_text = st.text_input("Bentuk Pelanggaran", placeholder="Misal: Terlambat masuk kelas / Tidak mengerjakan PR")
+                hukuman_text = st.text_input("Hukuman / Konsekuensi", placeholder="Misal: Menghafal surat pendek / Membersihkan perpustakaan")
+                
+                btn_simpan_pelanggaran = st.form_submit_button("🚨 Simpan Catatan Pelanggaran", use_container_width=True)
+                
+                if btn_simpan_pelanggaran:
+                    if pelanggaran_text and hukuman_text:
+                        target_username = student_options[selected_student_label]
+                        try:
+                            payload = {
+                                "student_username": target_username,
+                                "violation": pelanggaran_text.strip(),
+                                "punishment": hukuman_text.strip(),
+                                "teacher_name": st.session_state.user_name
+                            }
+                            supabase.table("violations").insert(payload).execute()
+                            st.success("Catatan pelanggaran berhasil disimpan!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Gagal menyimpan catatan pelanggaran: {e}")
+                    else:
+                        st.warning("Bentuk pelanggaran dan hukuman tidak boleh kosong.")
+            
+            st.markdown("---")
+            st.subheader("📊 Rekapitulasi & Download Pelanggaran Akhir Bulan")
+            
+            col_rm1, col_rm2 = st.columns(2)
+            with col_rm1:
+                months_dict = {
+                    1: "Januari", 2: "Februari", 3: "Maret", 4: "April", 5: "Mei", 6: "Juni",
+                    7: "Juli", 8: "Agustus", 9: "September", 10: "Oktober", 11: "November", 12: "Desember"
+                }
+                rekap_month = st.selectbox("Pilih Bulan Rekap", options=list(months_dict.keys()), format_func=lambda x: months_dict[x], index=datetime.now().month - 1, key="v_rekap_m")
+            with col_rm2:
+                rekap_year = st.selectbox("Pilih Tahun Rekap", [2025, 2026, 2027], index=1, key="v_rekap_y")
+                
+            try:
+                v_all = supabase.table("violations").select("*").order("created_at", desc=True).execute().data
+                filtered_violations = []
+                for v in v_all:
+                    if v.get("created_at"):
+                        dt_v = datetime.strptime(v["created_at"][:10], "%Y-%m-%d")
+                        if dt_v.month == rekap_month and dt_v.year == rekap_year:
+                            filtered_violations.append(v)
+                            
+                if filtered_violations:
+                    rekap_v_list = []
+                    for v in filtered_violations:
+                        s_name = next((s['full_name'] for s in students if s['username'] == v['student_username']), v['student_username'])
+                        rekap_v_list.append({
+                            "Tanggal": v["created_at"][:10],
+                            "Nama Siswa": s_name,
+                            "Username/NISN": v["student_username"],
+                            "Bentuk Pelanggaran": v["violation"],
+                            "Hukuman": v["punishment"],
+                            "Pencatat": v["teacher_name"]
+                        })
+                    df_v_rekap = pd.DataFrame(rekap_v_list)
+                    st.dataframe(df_v_rekap, use_container_width=True, hide_index=True)
+                    
+                    # Konversi ke Excel untuk didownload
+                    output_excel = io.BytesIO()
+                    with pd.ExcelWriter(output_excel, engine='xlsxwriter') as writer:
+                        df_v_rekap.to_excel(writer, sheet_name='Rekap Pelanggaran', index=False)
+                    excel_data = output_excel.getvalue()
+                    
+                    st.download_button(
+                        label=f"📥 Download Rekap Pelanggaran ({months_dict[rekap_month]} {rekap_year}) [.xlsx]",
+                        data=excel_data,
+                        file_name=f"Rekap_Pelanggaran_{months_dict[rekap_month]}_{rekap_year}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if st.button("🗑️ Hapus Seluruh Rekapan Bulan Ini Setelah Didownload", use_container_width=True):
+                        for v in filtered_violations:
+                            supabase.table("violations").delete().eq("id", v["id"]).execute()
+                        st.success(f"Rekap pelanggaran bulan {months_dict[rekap_month]} {rekap_year} berhasil dihapus dari sistem.")
+                        st.rerun()
+                else:
+                    st.info(f"Tidak ada catatan pelanggaran pada bulan {months_dict[rekap_month]} {rekap_year}.")
+            except Exception as e:
+                st.error(f"Gagal memuat rekap pelanggaran: {e}")
+
+            st.markdown("---")
+            st.subheader("📋 Riwayat Seluruh Pelanggaran Siswa")
+            try:
+                v_list = supabase.table("violations").select("*").order("created_at", desc=True).execute().data
+                if v_list:
+                    for v in v_list:
+                        s_name = next((s['full_name'] for s in students if s['username'] == v['student_username']), v['student_username'])
+                        with st.expander(f"⚠️ {s_name} — Pelanggaran: {v['violation']} ({v['created_at'][:10]})"):
+                            st.write(f"**Bentuk Pelanggaran:** {v['violation']}")
+                            st.write(f"**Hukuman / Konsekuensi:** {v['punishment']}")
+                            st.caption(f"Dicatat oleh Guru: {v['teacher_name']} | Tanggal: {v['created_at'][:10]}")
+                            if st.button("🗑️ Hapus Catatan Ini", key=f"del_v_{v['id']}"):
+                                supabase.table("violations").delete().eq("id", v['id']).execute()
+                                st.success("Catatan pelanggaran dihapus.")
+                                st.rerun()
+                else:
+                    st.info("Belum ada catatan pelanggaran siswa.")
+            except Exception as e:
+                st.error(f"Gagal memuat riwayat pelanggaran: {e}")
 
     elif menu == "Manajemen Akun Siswa":
         st.subheader("👥 Manajemen Akun Pengguna")
@@ -582,13 +706,12 @@ def dashboard_guru():
                     with st.expander(f"👤 {u['full_name']} — `@{u['username']}` ({u['role'].upper()})"):
                         c1, c2 = st.columns(2)
                         with c1:
-                            with st.form(key=f"reset_form_{u['id']}"):
-                                new_pwd = st.text_input("Sandi Baru", type="password", key=f"np_{u['id']}")
-                                if st.form_submit_button("Perbarui Sandi"):
-                                    if new_pwd:
-                                        supabase.table("users").update({"password": new_pwd}).eq("id", u['id']).execute()
-                                        st.success("Sandi diperbarui!")
-                                        st.rerun()
+                            st.write("Reset Sandi Akun")
+                            st.caption("Mengembalikan sandi ke default: `Bringin02`")
+                            if st.button("🔄 Reset Sandi ke 'Bringin02'", key=f"reset_btn_{u['id']}"):
+                                supabase.table("users").update({"password": "Bringin02"}).eq("id", u['id']).execute()
+                                st.success(f"Sandi akun {u['full_name']} berhasil direset ke 'Bringin02'!")
+                                st.rerun()
                         with c2:
                             st.write("Zona Bahaya")
                             if st.button(f"🗑️ Hapus Akun Ini", key=f"del_{u['id']}"):
@@ -646,7 +769,7 @@ def dashboard_guru():
                         default_idx = status_options.index(curr_status) if curr_status in status_options else 0
                         
                         c1, c2, c3, c4 = st.columns([3, 2, 2, 3])
-                        c1.markdown(f"**{s['full_name']}**<br><span style='font-size:12px; color:#00F2FE;'>`{s['username']}`</span>", unsafe_allow_html=True)
+                        c1.markdown(f"**{s['full_name']}**<br><span style='font-size:12px; color:#00fff0;'>`{s['username']}`</span>", unsafe_allow_html=True)
                         st_val = c2.selectbox("Status", status_options, index=default_idx, key=f"st_{s['username']}", label_visibility="collapsed")
                         lt_val = c3.number_input("Menit", min_value=0, value=int(curr_late), key=f"lt_{s['username']}", label_visibility="collapsed")
                         rs_val = c4.text_input("Keterangan", value=str(curr_reason), key=f"rs_{s['username']}", label_visibility="collapsed", placeholder="Opsional...")
@@ -767,7 +890,7 @@ def dashboard_guru():
                     score_inputs = {}
                     for s in students:
                         c_n, c_s = st.columns([3, 2])
-                        c_n.markdown(f"**{s['full_name']}**<br><span style='font-size:12px; color:#00F2FE;'>`{s['username']}`</span>", unsafe_allow_html=True)
+                        c_n.markdown(f"**{s['full_name']}**<br><span style='font-size:12px; color:#00fff0;'>`{s['username']}`</span>", unsafe_allow_html=True)
                         sc_val = c_s.number_input("Nilai", min_value=0.0, max_value=100.0, value=75.0, step=0.5, key=f"score_{s['username']}", label_visibility="collapsed")
                         score_inputs[s["username"]] = sc_val
                         st.markdown("<hr style='margin: 5px 0px; border-color: rgba(1, 89, 90, 0.4);'>", unsafe_allow_html=True)
@@ -904,24 +1027,50 @@ def dashboard_guru():
 def dashboard_siswa():
     render_top_left_credit()
     st.markdown(f'<p class="main-header">Panel Siswa</p>', unsafe_allow_html=True)
-    st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00F2FE;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="sub-header">Selamat datang, <b style="color:#00fff0;">{st.session_state.user_name}</b>.</p>', unsafe_allow_html=True)
     
     st.sidebar.title("🧭 Navigasi Siswa")
     menu = st.sidebar.radio("Pilih Menu", ["Beranda", "Absensi Pribadi", "Nilai Saya", "Ganti Kata Sandi"])
     
     if menu == "Beranda":
         render_quote_siswa()
-        
-        # TAMPILKAN HITUNG MUNDUR / NOTIFIKASI KELULUSAN DI BERANDA SISWA
         render_graduation_countdown()
         
+        # Pengecekan Pelanggaran Siswa (Otomatis hilang setelah 3 hari)
+        try:
+            my_uname = st.session_state.username
+            all_my_violations = supabase.table("violations").select("*").eq("student_username", my_uname).order("created_at", desc=True).execute().data
+            
+            valid_violations = []
+            today_dt = datetime.now()
+            for v in all_my_violations:
+                if v.get("created_at"):
+                    v_date = datetime.strptime(v["created_at"][:10], "%Y-%m-%d")
+                    diff_days = (today_dt - v_date).days
+                    if diff_days <= 3:
+                        valid_violations.append(v)
+                        
+            if valid_violations:
+                st.markdown("### ⚠️ Catatan & Peringatan Pelanggaran")
+                for v in valid_violations:
+                    st.markdown(f"""
+                    <div class="warning-card">
+                        <span style="background-color: #FDE047; color: #07090E; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">⚠️ PERINGATAN / WARNING (Otomatis hilang setelah 3 hari)</span>
+                        <h4 style="margin: 8px 0 4px 0; color: #F8FAFC;">Pelanggaran: {v['violation']}</h4>
+                        <p style="color: #E2E8F0; font-size: 14px; margin-bottom: 6px;"><b>Hukuman / Konsekuensi:</b> {v['punishment']}</p>
+                        <small style="color: #cbd5e1;">Dicatat oleh Guru: {v['teacher_name']} | Tanggal: {v['created_at'][:10]}</small>
+                    </div>
+                    """, unsafe_allow_html=True)
+        except Exception as e:
+            pass
+
         st.subheader("📢 Pengumuman, Tugas & Informasi Kelas")
         try:
             anc = supabase.table("announcements").select("*").order("created_at", desc=True).execute().data
             if anc:
                 for a in anc:
                     badge_color = "#01595A"
-                    text_color = "#00F2FE"
+                    text_color = "#00fff0"
                     if a['category'] == "Tugas/PR":
                         badge_color = "#7F1D1D"
                         text_color = "#FCA5A5"
@@ -1080,7 +1229,7 @@ def dashboard_siswa():
                         
                     with col_grafik:
                         st.markdown(f"**Diagram Titik & Tren: {selected_mapel}**")
-                        chart = alt.Chart(df_mapel).mark_circle(size=80, color="#00F2FE").encode(
+                        chart = alt.Chart(df_mapel).mark_circle(size=80, color="#00fff0").encode(
                             x=alt.X('material_name:N', sort=None, title='Materi Evaluasi'),
                             y=alt.Y('score:Q', title='Nilai Siswa', scale=alt.Scale(domain=[0, 100])),
                             tooltip=['subject', 'chapter', 'material_name', 'score', 'kkm']
@@ -1150,5 +1299,3 @@ else:
         dashboard_guru()
     else:
         dashboard_siswa()
-
-
